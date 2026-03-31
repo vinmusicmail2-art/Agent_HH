@@ -494,6 +494,7 @@ let activeVacancyUrl   = "";
 let activeVacancyTitle = "";
 let starred     = JSON.parse(localStorage.getItem("starred") || "{}");
 let viewingStarred = false;
+let currentSearchField = "";
 
 // ── Backend status ──
 async function checkBackend() {
@@ -520,7 +521,7 @@ async function loadCategories() {
     cats.forEach(c => {
       if (c.type === "section") {
         curSecId = c.id;
-        sectionQueries[c.id] = { name: c.name, queries: [] };
+        sectionQueries[c.id] = { name: c.name, queries: [], searchField: "name" };
       } else if (c.type === "job" && curSecId) {
         sectionQueries[curSecId].queries.push(c.query);
       }
@@ -540,7 +541,7 @@ async function loadCategories() {
         </div>
         <div class="cat-group" data-group-id="${esc(c.id)}" style="max-height:2000px">`;
       } else {
-        html += `<div class="cat-item" data-id="${esc(c.id)}" data-query="${esc(c.query)}" onclick="selectCat(this)">
+        html += `<div class="cat-item" data-id="${esc(c.id)}" data-query="${esc(c.query)}" data-search-field="${esc(c.search_field || '')}" onclick="selectCat(this)">
           <span class="cat-icon">${c.icon || "📁"}</span>
           <span class="cat-name">${esc(c.name)}</span>
         </div>`;
@@ -581,6 +582,7 @@ function selectSection(el) {
   el.classList.add("active");
   viewingStarred = false;
 
+  currentSearchField = sec.searchField || "name";
   const combined = sec.queries.join(" OR ");
   document.getElementById("searchInput").value = combined;
   doSearch(0);
@@ -592,6 +594,7 @@ function selectCat(el) {
   document.getElementById("starredTab").classList.remove("active");
   el.classList.add("active");
   viewingStarred = false;
+  currentSearchField = el.dataset.searchField || "";
   document.getElementById("searchInput").value = el.dataset.query;
   doSearch(0);
 }
@@ -613,14 +616,15 @@ async function doSearch(page) {
   const order      = document.getElementById("orderSelect").value;
 
   let url = `${API}/search?query=${encodeURIComponent(q)}&page=${page}&per_page=20`;
-  if (area)       url += `&area=${area}`;
-  if (exp)        url += `&experience=${exp}`;
-  if (sal)        url += `&salary_from=${sal}`;
-  if (period)     url += `&period=${period}`;
-  if (education)  url += `&education=${encodeURIComponent(education)}`;
-  if (schedule)   url += `&schedule=${schedule}`;
-  if (employment) url += `&employment=${employment}`;
-  if (order)      url += `&order_by=${order}`;
+  if (area)                url += `&area=${area}`;
+  if (exp)                 url += `&experience=${exp}`;
+  if (sal)                 url += `&salary_from=${sal}`;
+  if (period)              url += `&period=${period}`;
+  if (education)           url += `&education=${encodeURIComponent(education)}`;
+  if (schedule)            url += `&schedule=${schedule}`;
+  if (employment)          url += `&employment=${employment}`;
+  if (order)               url += `&order_by=${order}`;
+  if (currentSearchField)  url += `&search_field=${encodeURIComponent(currentSearchField)}`;
 
   setListLoading();
   document.getElementById("searchBtn").disabled = true;
@@ -641,6 +645,7 @@ async function doSearch(page) {
 // ── Starred ──
 function showStarred() {
   document.querySelectorAll(".cat-item").forEach(i => i.classList.remove("active"));
+  document.querySelectorAll(".cat-section").forEach(i => i.classList.remove("active"));
   document.getElementById("starredTab").classList.add("active");
   viewingStarred = true;
   document.getElementById("foundLabel").innerHTML =
@@ -882,6 +887,9 @@ function esc(s) {
 // ── Init ──
 document.getElementById("searchInput").addEventListener("keydown", e => {
   if (e.key === "Enter") doSearch(0);
+});
+document.getElementById("searchInput").addEventListener("input", () => {
+  currentSearchField = "";
 });
 checkBackend();
 setInterval(checkBackend, 10000);

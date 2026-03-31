@@ -28,73 +28,85 @@ CATEGORIES = [
         "id": "ai_creator", "type": "job",
         "name": "AI-креатор",
         "icon": "🎬",
-        "query": "AI-креатор OR AI креатор OR AI video creator OR нейросети видео"
+        "search_field": "name",
+        "query": "\"AI-креатор\" OR \"AI креатор\""
     },
     {
         "id": "ai_artist", "type": "job",
         "name": "AI-художник",
         "icon": "🎨",
-        "query": "AI художник OR AI-художник OR Midjourney OR Stable Diffusion OR нейросети изображения"
+        "search_field": "name",
+        "query": "\"AI-художник\" OR \"AI художник\""
     },
     {
         "id": "ai_videomaker", "type": "job",
         "name": "AI-видеомейкер",
         "icon": "🎥",
-        "query": "AI-видеомейкер OR AI видеомейкер OR нейросети видео монтаж OR Runway Kling Luma"
+        "search_field": "name",
+        "query": "\"AI-видеомейкер\" OR \"AI видеомейкер\""
     },
     {
         "id": "ai_video_content", "type": "job",
         "name": "Специалист по AI-видеоконтенту",
         "icon": "📱",
-        "query": "специалист AI видеоконтент OR создание AI видео OR нейросети видеоконтент"
+        "search_field": "name",
+        "query": "\"AI-видеоконтент\" OR \"AI видеоконтент\" OR \"создание AI-видео\" OR \"специалист по AI-видео\""
     },
     {
         "id": "ai_gen_video", "type": "job",
         "name": "Специалист по генерации видео (нейросети)",
         "icon": "⚡",
-        "query": "генерация видео нейросети OR Runway Gen OR Kling OR Luma Dream Machine OR специалист нейросети видео"
+        "search_field": "name",
+        "query": "\"генерация видео\" AND нейросети OR \"генерация AI-видео\" OR \"специалист по генерации видео\""
     },
     {
         "id": "ai_factory", "type": "job",
         "name": "AI Factory специалист",
         "icon": "🏭",
-        "query": "AI Factory OR ComfyUI автоматизация видео OR пайплайн нейросети видео OR массовая генерация видео"
+        "search_field": "name",
+        "query": "\"AI Factory\" OR \"AI-Factory\""
     },
     {
         "id": "content_maker_ai", "type": "job",
         "name": "Контент-мейкер (AI video)",
         "icon": "✨",
-        "query": "контент-мейкер нейросети OR контент мейкер AI OR видеоконтент нейросети соцсети"
+        "search_field": "name",
+        "query": "\"контент-мейкер\" AND (AI OR нейросети) OR \"AI video\" AND контент OR \"контент-мейкер AI\""
     },
     {
         "id": "editor_ai", "type": "job",
         "name": "Видеомонтажер с нейросетями",
         "icon": "🖥️",
-        "query": "видеомонтажер нейросети OR монтажер AI инструменты OR монтаж нейросети Topaz"
+        "search_field": "name",
+        "query": "\"видеомонтажер\" AND нейросети OR \"монтажер\" AND нейросети OR \"монтажер\" AND AI"
     },
     {
         "id": "ai_artist_anim", "type": "job",
         "name": "AI artist (видео / анимация)",
         "icon": "🌀",
-        "query": "AI artist видео OR AI artist анимация OR AnimateDiff OR нейросети анимация"
+        "search_field": "name",
+        "query": "\"AI artist\" OR \"AI-artist\""
     },
     {
         "id": "creator_ai", "type": "job",
         "name": "Креатор видеоконтента (нейросети)",
         "icon": "💡",
-        "query": "креатор видеоконтент нейросети OR видеоконтент ИИ OR CapCut нейросети"
+        "search_field": "name",
+        "query": "\"креатор видеоконтента\" OR \"креатор\" AND нейросети OR \"креатор\" AND ИИ"
     },
     {
         "id": "ai_animation", "type": "job",
         "name": "Специалист по AI-анимации",
         "icon": "🎭",
-        "query": "специалист AI анимация OR AI-анимация OR AnimateDiff Runway анимация OR Pika анимация"
+        "search_field": "name",
+        "query": "\"AI-анимация\" OR \"AI анимация\" OR \"специалист по анимации\" AND AI"
     },
     {
         "id": "ai_production", "type": "job",
         "name": "Видеопродакшн с ИИ",
         "icon": "🎞️",
-        "query": "видеопродакшн ИИ OR продакшн нейросети OR AI видео продакшн руководитель"
+        "search_field": "name",
+        "query": "\"видеопродакшн\" AND (ИИ OR AI OR нейросети) OR \"продакшн\" AND AI"
     },
 
     # ── Раздел 2: Режиссура и монтаж ──
@@ -106,67 +118,78 @@ CATEGORIES = [
         "id": "edit_director", "type": "job",
         "name": "Режиссер монтажа",
         "icon": "🎞️",
-        "query": "режиссер монтажа OR режиссёр монтажа"
+        "search_field": "name",
+        "query": "\"режиссер монтажа\" OR \"режиссёр монтажа\""
     },
     {
         "id": "edit_director_promo", "type": "job",
         "name": "Режиссер монтажа (промо)",
         "icon": "📺",
-        "query": "режиссер монтажа промо OR монтаж промо трейлер тизер"
+        "search_field": "name",
+        "query": "\"режиссер монтажа\" AND (промо OR трейлер OR тизер) OR \"режиссёр монтажа\" AND (промо OR трейлер)"
     },
     {
         "id": "edit_director_news", "type": "job",
         "name": "Режиссер монтажа (новости)",
         "icon": "📰",
-        "query": "режиссер монтажа новости OR монтаж новостных сюжетов OR Avid монтаж"
+        "search_field": "name",
+        "query": "\"режиссер монтажа\" AND (новости OR новостной) OR \"режиссёр монтажа\" AND новости"
     },
     {
         "id": "videoeditor", "type": "job",
         "name": "Видеомонтажер",
         "icon": "✂️",
-        "query": "видеомонтажер OR видео монтажер OR монтажер Premiere Pro DaVinci"
+        "search_field": "name",
+        "query": "\"видеомонтажер\" OR \"видео-монтажер\""
     },
     {
         "id": "editor_tech", "type": "job",
         "name": "Монтажер",
         "icon": "🔧",
-        "query": "монтажер видео OR технический монтажер OR монтаж хроника"
+        "search_field": "name",
+        "query": "монтажер AND (видео OR хроника OR \"Premiere Pro\" OR \"DaVinci\" OR \"Final Cut\")"
     },
     {
         "id": "videographer_editor", "type": "job",
         "name": "Видеограф-монтажер",
         "icon": "📷",
-        "query": "видеограф монтажер OR видеограф-монтажер OR съемка монтаж"
+        "search_field": "name",
+        "query": "\"видеограф-монтажер\" OR \"видеограф монтажер\""
     },
     {
         "id": "operator_editor", "type": "job",
         "name": "Оператор-монтажер",
         "icon": "🎦",
-        "query": "оператор-монтажер OR оператор монтажер OR съемка монтаж Sony Canon Blackmagic"
+        "search_field": "name",
+        "query": "\"оператор-монтажер\" OR \"оператор монтажер\""
     },
     {
         "id": "edit_director2", "type": "job",
         "name": "Режиссер видеомонтажа",
         "icon": "🎬",
-        "query": "режиссер видеомонтажа OR руководство монтажом видеопроекта"
+        "search_field": "name",
+        "query": "\"режиссер видеомонтажа\" OR \"режиссёр видеомонтажа\""
     },
     {
         "id": "lead_editor", "type": "job",
         "name": "Ведущий режиссер монтажа",
         "icon": "👑",
-        "query": "ведущий режиссер монтажа OR старший монтажер OR руководитель монтажа"
+        "search_field": "name",
+        "query": "\"ведущий режиссер монтажа\" OR \"ведущий режиссёр монтажа\" OR \"старший монтажер\" AND видео"
     },
     {
         "id": "asst_editor", "type": "job",
         "name": "Ассистент режиссера монтажа",
         "icon": "📋",
-        "query": "ассистент режиссера монтажа OR ассистент монтажа OR помощник монтажера"
+        "search_field": "name",
+        "query": "\"ассистент режиссера монтажа\" OR \"ассистент монтажа\" OR \"помощник монтажера\""
     },
     {
         "id": "postprod_head", "type": "job",
         "name": "Руководитель постпродакшна",
         "icon": "🏆",
-        "query": "руководитель постпродакшна OR head of post-production OR руководитель постпроизводства"
+        "search_field": "name",
+        "query": "\"руководитель постпродакшна\" OR \"руководитель пост-продакшн\" OR \"head of post-production\""
     },
 
     # ── Раздел 3: Операторская работа ──
@@ -178,25 +201,29 @@ CATEGORIES = [
         "id": "camera_op", "type": "job",
         "name": "Оператор видеозаписи",
         "icon": "🎥",
-        "query": "оператор видеозаписи OR видеооператор OR оператор Sony FX Canon RED ARRI"
+        "search_field": "name",
+        "query": "\"оператор видеозаписи\" OR \"видеооператор\""
     },
     {
         "id": "videographer", "type": "job",
         "name": "Видеограф",
         "icon": "🤳",
-        "query": "видеограф OR videographer OR съемка мероприятий корпоративных видео"
+        "search_field": "name",
+        "query": "видеограф"
     },
     {
         "id": "correspondent", "type": "job",
         "name": "Корреспондент (видеомонтаж)",
         "icon": "🎤",
-        "query": "корреспондент видеомонтаж OR тележурналист OR журналист видеосюжет"
+        "search_field": "name",
+        "query": "корреспондент AND (видео OR монтаж OR съемка)"
     },
     {
         "id": "tv_journalist", "type": "job",
         "name": "Тележурналист",
         "icon": "📡",
-        "query": "тележурналист OR телевизионный журналист OR TV журналист"
+        "search_field": "name",
+        "query": "\"тележурналист\" OR \"телевизионный журналист\""
     },
 
     # ── Раздел 4: Постпродакшн и моушн-дизайн ──
@@ -208,13 +235,15 @@ CATEGORIES = [
         "id": "colorist", "type": "job",
         "name": "Цветокорректор",
         "icon": "🌈",
-        "query": "цветокорректор OR колорист OR цветокоррекция DaVinci Resolve OR colorist"
+        "search_field": "name",
+        "query": "\"цветокорректор\" OR \"колорист\" OR \"colorist\""
     },
     {
         "id": "postprod_spec", "type": "job",
         "name": "Специалист по постпродакшну",
         "icon": "⚙️",
-        "query": "специалист постпродакшн OR постпродакшн специалист OR VFX монтаж цветокоррекция"
+        "search_field": "name",
+        "query": "\"специалист по постпродакшну\" OR \"специалист пост-продакшн\" OR постпродакшн AND специалист"
     },
 
     # ── Раздел 5: Звук ──
@@ -226,31 +255,36 @@ CATEGORIES = [
         "id": "sound_director", "type": "job",
         "name": "Звукорежиссер",
         "icon": "🎚️",
-        "query": "звукорежиссер OR звукорежиссёр OR audio engineer OR сведение мастеринг"
+        "search_field": "name",
+        "query": "\"звукорежиссер\" OR \"звукорежиссёр\""
     },
     {
         "id": "sound_postprod", "type": "job",
         "name": "Звукорежиссер пост-продакшн",
         "icon": "🎛️",
-        "query": "звукорежиссер постпродакшн OR озвучивание видео OR ADR шумоочистка"
+        "search_field": "name",
+        "query": "\"звукорежиссер\" AND (постпродакшн OR \"пост-продакшн\" OR озвучивание OR ADR)"
     },
     {
         "id": "sound_producer", "type": "job",
         "name": "Саунд-продюсер",
         "icon": "🎼",
-        "query": "саунд продюсер OR sound producer OR музыкальный продюсер видео"
+        "search_field": "name",
+        "query": "\"саунд-продюсер\" OR \"саунд продюсер\" OR \"sound producer\""
     },
     {
         "id": "mastering", "type": "job",
         "name": "Мастеринг-инженер",
         "icon": "🔊",
-        "query": "мастеринг инженер OR mastering engineer OR нормализация громкости LUFS"
+        "search_field": "name",
+        "query": "\"мастеринг-инженер\" OR \"mastering engineer\" OR \"мастеринг инженер\""
     },
     {
         "id": "mixing", "type": "job",
         "name": "Специалист по сведению",
         "icon": "🎹",
-        "query": "специалист сведение мастеринг OR mixing mastering OR аудио постпродакшн"
+        "search_field": "name",
+        "query": "\"специалист по сведению\" OR \"сведение и мастеринг\" OR специалист AND (сведение OR мастеринг) AND аудио"
     },
 
     # ── Раздел 6: Контент и диджитал ──
@@ -262,19 +296,22 @@ CATEGORIES = [
         "id": "content_maker", "type": "job",
         "name": "Контент-мейкер",
         "icon": "📝",
-        "query": "контент-мейкер OR контент мейкер OR создание контента соцсети видео"
+        "search_field": "name",
+        "query": "\"контент-мейкер\" OR \"контент мейкер\""
     },
     {
         "id": "smm_content", "type": "job",
         "name": "SMM-менеджер / Контент-мейкер",
         "icon": "📣",
-        "query": "SMM менеджер контент-мейкер OR SMM видеоконтент OR ведение соцсетей видео"
+        "search_field": "name",
+        "query": "SMM AND \"контент-мейкер\" OR \"SMM-менеджер\" AND контент OR \"SMM\" AND \"контент мейкер\""
     },
     {
         "id": "reelsmaker", "type": "job",
         "name": "Рилсмейкер",
         "icon": "📸",
-        "query": "рилсмейкер OR reels maker OR Reels TikTok Shorts монтажер OR вертикальное видео"
+        "search_field": "name",
+        "query": "\"рилсмейкер\" OR \"рилс-мейкер\" OR \"reels maker\""
     },
 
     # ── Раздел 7: Вайбкодинг ──
@@ -286,7 +323,8 @@ CATEGORIES = [
         "id": "vibe_coder", "type": "job",
         "name": "Вайбкодер / Vibe Coder",
         "icon": "🌊",
-        "query": "вайбкодер OR вайб-кодер OR вайбкодинг OR \"vibe coder\" OR \"vibe coding\" OR \"vibe developer\" OR \"vibe coding engineer\" OR \"vibe programmer\" OR \"vibe coder engineer\" OR \"vibe coder developer\" OR \"AI-native coder\" OR \"AI-first coder\" OR вайб-разработчик OR вайб-программист OR вайб-инженер OR \"vibe coder specialist\" OR \"vibe coding specialist\""
+        "search_field": "name",
+        "query": "\"вайбкодер\" OR \"вайб-кодер\" OR \"вайбкодинг\" OR \"vibe coder\" OR \"vibe coding\" OR \"vibe developer\" OR \"AI-native coder\" OR \"AI-first coder\" OR \"вайб-разработчик\" OR \"вайб-программист\""
     },
 
     # ── Раздел 8: Смежные профессии ──
@@ -298,19 +336,22 @@ CATEGORIES = [
         "id": "photographer", "type": "job",
         "name": "Фотограф (видеопроекты)",
         "icon": "📸",
-        "query": "фотограф видеопроект OR фотограф продакшн OR фотограф Lightroom Photoshop"
+        "search_field": "name",
+        "query": "фотограф AND (видео OR продакшн OR анимация OR съемки)"
     },
     {
         "id": "drone_op", "type": "job",
         "name": "Оператор дрона",
         "icon": "🚁",
-        "query": "оператор дрона OR дрон-оператор OR квадрокоптер DJI аэросъемка"
+        "search_field": "name",
+        "query": "\"оператор дрона\" OR \"дрон-оператор\" OR \"аэросъемка\" OR \"квадрокоптер\" AND оператор"
     },
     {
         "id": "targetolog", "type": "job",
         "name": "Таргетолог (видеокреативы)",
         "icon": "🎯",
-        "query": "таргетолог видеокреативы OR таргетолог видео реклама OR таргетированная реклама видео"
+        "search_field": "name",
+        "query": "таргетолог AND (видео OR креатив)"
     },
 ]
 
@@ -331,6 +372,7 @@ async def search_jobs(
     schedule: Optional[str] = Query(None),
     employment: Optional[str] = Query(None),
     order_by: Optional[str] = Query(None),
+    search_field: Optional[str] = Query(None),
     page: int = Query(0),
     per_page: int = Query(20),
 ):
@@ -340,6 +382,8 @@ async def search_jobs(
         "per_page": min(per_page, 100),
         "order_by": order_by if order_by else "relevance",
     }
+    if search_field:
+        params["search_field"] = search_field
     if area:
         params["area"] = area
     if salary_from:

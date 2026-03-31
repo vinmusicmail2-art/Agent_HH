@@ -1,6 +1,8 @@
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 import httpx
+import os
 from typing import Optional
 
 app = FastAPI(title="HH Agent Backend")
@@ -11,6 +13,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend")
 
 HH_API_URL = "https://api.hh.ru"
 
@@ -322,6 +326,11 @@ async def search_jobs(
     area: Optional[str] = Query(None),
     salary_from: Optional[int] = Query(None),
     experience: Optional[str] = Query(None),
+    period: Optional[int] = Query(None),
+    education: Optional[str] = Query(None),
+    schedule: Optional[str] = Query(None),
+    employment: Optional[str] = Query(None),
+    order_by: Optional[str] = Query(None),
     page: int = Query(0),
     per_page: int = Query(20),
 ):
@@ -329,7 +338,7 @@ async def search_jobs(
         "text": query,
         "page": page,
         "per_page": min(per_page, 100),
-        "order_by": "relevance",
+        "order_by": order_by if order_by else "relevance",
     }
     if area:
         params["area"] = area
@@ -338,6 +347,14 @@ async def search_jobs(
         params["only_with_salary"] = "true"
     if experience:
         params["experience"] = experience
+    if period:
+        params["period"] = period
+    if education:
+        params["education"] = education
+    if schedule:
+        params["schedule"] = schedule
+    if employment:
+        params["employment"] = employment
 
     headers = {
         "User-Agent": "HH-Agent/1.0 (job search application)",
@@ -401,6 +418,68 @@ async def search_jobs(
         return {"error": str(e), "items": [], "found": 0, "pages": 0, "page": 0}
 
 
+@app.get("/api/vacancy/{vacancy_id}")
+async def get_vacancy(vacancy_id: str):
+    headers = {
+        "User-Agent": "HH-Agent/1.0 (job search application)",
+        "HH-User-Agent": "HH-Agent/1.0 (job search application)",
+    }
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            response = await client.get(
+                f"{HH_API_URL}/vacancies/{vacancy_id}",
+                headers=headers,
+            )
+            response.raise_for_status()
+            v = response.json()
+
+        salary = v.get("salary")
+        salary_text = "Зарплата не указана"
+        if salary:
+            s_from = salary.get("from")
+            s_to = salary.get("to")
+            currency = salary.get("currency") or ""
+            if s_from and s_to:
+                salary_text = f"{s_from:,} — {s_to:,} {currency}".replace(",", " ")
+            elif s_from:
+                salary_text = f"от {s_from:,} {currency}".replace(",", " ")
+            elif s_to:
+                salary_text = f"до {s_to:,} {currency}".replace(",", " ")
+
+        employer = v.get("employer") or {}
+        area_obj = v.get("area") or {}
+        experience_obj = v.get("experience") or {}
+        employment_obj = v.get("employment") or {}
+        schedule_obj = v.get("schedule") or {}
+        key_skills = [s.get("name", "") for s in (v.get("key_skills") or [])]
+
+        return {
+            "id": v.get("id", ""),
+            "name": v.get("name", ""),
+            "salary_text": salary_text,
+            "employer_name": employer.get("name", ""),
+            "employer_logo": (employer.get("logo_urls") or {}).get("90"),
+            "employer_url": employer.get("alternate_url", ""),
+            "area": area_obj.get("name", ""),
+            "experience": experience_obj.get("name", ""),
+            "employment": employment_obj.get("name", ""),
+            "schedule": schedule_obj.get("name", ""),
+            "published_at": v.get("published_at", ""),
+            "url": v.get("alternate_url", ""),
+            "description": v.get("description", ""),
+            "key_skills": key_skills,
+        }
+    except httpx.HTTPStatusError as e:
+        return {"error": f"HH.ru API error: {e.response.status_code}"}
+    except Exception as e:
+        return {"error": str(e)}
+
+
 @app.get("/api/healthz")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/")
+def serve_index():
+    return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))

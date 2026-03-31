@@ -77,11 +77,12 @@
   /* ── FILTERS ── */
   .filters {
     background: var(--sidebar); border-bottom: 1px solid var(--border);
-    padding: 6px 16px; display: flex; gap: 10px; align-items: center; flex-shrink: 0;
+    padding: 6px 16px; display: flex; flex-wrap: wrap; gap: 8px 10px; align-items: center; flex-shrink: 0;
   }
-  .flabel { font-size: 11px; color: var(--text-muted); }
+  .flabel { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+  .filter-sep { width: 100%; height: 0; margin: 0; }
   select { padding: 4px 8px; }
-  #salaryInput { padding: 4px 8px; width: 120px; }
+  #salaryInput { padding: 4px 8px; width: 110px; }
 
   /* ── BODY: 3 columns ── */
   .body { display: flex; flex: 1; overflow: hidden; }
@@ -101,12 +102,15 @@
   /* Section header (e.g. "AI-СПЕЦИАЛИСТЫ ПО ВИДЕО") */
   .cat-section {
     display: flex; align-items: center; gap: 6px;
-    padding: 10px 10px 4px;
+    padding: 8px 10px 4px;
     font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px;
     color: #64748b; font-weight: 700;
-    margin-top: 4px;
+    margin-top: 4px; border-radius: 7px; margin-left: 4px; margin-right: 4px;
+    cursor: pointer; transition: all 0.12s;
   }
   .cat-section:first-child { margin-top: 0; }
+  .cat-section:hover { background: var(--card-hover); color: #94a3b8; }
+  .cat-section.active { background: rgba(59,130,246,0.08); color: var(--accent); }
   /* Clickable job item */
   .cat-item {
     display: flex; align-items: center; gap: 8px;
@@ -244,8 +248,64 @@
   }
   .preview-close:hover { color: var(--text); }
 
-  .preview-body { flex: 1; overflow: hidden; }
-  webview { width: 100%; height: 100%; border: none; background: white; display: block; }
+  .preview-body { flex: 1; overflow-y: auto; }
+
+  /* ── Structured vacancy detail ── */
+  .vd-wrap { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+  .vd-top { display: flex; align-items: flex-start; gap: 14px; }
+  .vd-logo {
+    width: 52px; height: 52px; border-radius: 10px; object-fit: contain;
+    background: #0f172a; border: 1px solid var(--border); flex-shrink: 0;
+  }
+  .vd-logo-ph {
+    width: 52px; height: 52px; border-radius: 10px; background: var(--tag-bg);
+    display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;
+  }
+  .vd-meta { flex: 1; min-width: 0; }
+  .vd-title { font-size: 17px; font-weight: 700; color: var(--text); line-height: 1.3; margin-bottom: 4px; }
+  .vd-company { font-size: 13px; color: var(--accent); }
+  .vd-salary {
+    font-size: 20px; font-weight: 700; color: var(--green);
+  }
+  .vd-salary.none { font-size: 13px; color: var(--text-muted); font-weight: 400; }
+  .vd-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .vd-skills { display: flex; flex-wrap: wrap; gap: 5px; }
+  .vd-skill {
+    font-size: 11px; padding: 3px 9px; border-radius: 20px;
+    background: var(--tag-bg); color: var(--tag-text); border: 1px solid #1e3a5f;
+  }
+  .vd-section-title {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.7px;
+    color: var(--text-muted); font-weight: 700; margin-bottom: 6px;
+  }
+  .vd-description {
+    font-size: 13px; color: var(--text); line-height: 1.7;
+    border-top: 1px solid var(--border); padding-top: 14px;
+  }
+  .vd-description ul { padding-left: 18px; margin: 6px 0; }
+  .vd-description li { margin-bottom: 4px; }
+  .vd-description p { margin-bottom: 8px; }
+  .vd-open-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--accent); color: white; border: none;
+    padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 600;
+    cursor: pointer; text-decoration: none; transition: background 0.15s; align-self: flex-start;
+  }
+  .vd-open-btn:hover { background: var(--accent-hover); }
+  .vd-loading {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 200px; gap: 12px; color: var(--text-muted);
+  }
+
+  /* ── Sidebar collapsing ── */
+  .cat-section-arrow {
+    background: none; border: none; cursor: pointer;
+    font-size: 10px; color: var(--text-muted); padding: 2px 4px;
+    transition: transform 0.2s, color 0.15s; flex-shrink: 0; line-height: 1;
+  }
+  .cat-section-arrow:hover { color: var(--text); }
+  .cat-group { overflow: hidden; transition: max-height 0.3s ease; }
+  .cat-group.collapsed { max-height: 0 !important; }
 
   .preview-placeholder {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -297,6 +357,7 @@
 
 <!-- FILTERS -->
 <div class="filters">
+  <!-- Строка 1 -->
   <span class="flabel">Город:</span>
   <select id="areaSelect">
     <option value="">Все города</option>
@@ -318,6 +379,49 @@
   </select>
   <span class="flabel">Зарплата от:</span>
   <input id="salaryInput" type="number" placeholder="напр. 100000" step="10000" min="0" />
+  <span class="flabel">Период:</span>
+  <select id="periodSelect">
+    <option value="">Любой</option>
+    <option value="1">Сегодня</option>
+    <option value="3">3 дня</option>
+    <option value="7">Неделя</option>
+    <option value="14">2 недели</option>
+    <option value="30">Месяц</option>
+  </select>
+
+  <!-- Разделитель строк -->
+  <div class="filter-sep"></div>
+
+  <!-- Строка 2 -->
+  <span class="flabel">Образование:</span>
+  <select id="educationSelect">
+    <option value="not_required_or_not_specified" selected>Не требуется или не указано</option>
+    <option value="">Любое</option>
+    <option value="special_secondary">Среднее специальное</option>
+    <option value="higher">Высшее</option>
+  </select>
+  <span class="flabel">Формат работы:</span>
+  <select id="scheduleSelect">
+    <option value="">Любой</option>
+    <option value="fullDay">На месте работодателя</option>
+    <option value="remote">Удалённо</option>
+    <option value="hybrid">Гибрид</option>
+    <option value="flyInFlyOut">Разъездной</option>
+  </select>
+  <span class="flabel">Тип занятости:</span>
+  <select id="employmentSelect">
+    <option value="">Любой</option>
+    <option value="full">Полная занятость</option>
+    <option value="part">Частичная занятость</option>
+    <option value="project">Подработка</option>
+  </select>
+  <span class="flabel">Сортировка:</span>
+  <select id="orderSelect">
+    <option value="relevance">По соответствию</option>
+    <option value="publication_time">По дате изменения</option>
+    <option value="salary_desc">По убыванию зарплаты</option>
+    <option value="salary_asc">По возрастанию зарплаты</option>
+  </select>
 </div>
 
 <!-- BODY -->
@@ -373,10 +477,16 @@
 </div>
 
 <script>
-const API = "http://127.0.0.1:8000/api";
+// Auto-detect: Electron loads from file://, web loads from http://
+const API = (window.location.protocol === "file:")
+  ? "http://127.0.0.1:8000/api"
+  : "/api";
 
 // Store vacancy data by ID to avoid passing data through onclick attributes
 const vacancyMap = new Map();
+
+// Section id → { name, queries[] } built when categories load
+const sectionQueries = {};
 
 let currentPage = 0;
 let totalPages  = 0;
@@ -404,23 +514,81 @@ async function loadCategories() {
   try {
     const r = await fetch(`${API}/categories`);
     const cats = await r.json();
-    document.getElementById("catList").innerHTML = cats.map(c => {
+
+    // Build section → queries map
+    let curSecId = null;
+    cats.forEach(c => {
       if (c.type === "section") {
-        return `<div class="cat-section">${c.icon} ${esc(c.name)}</div>`;
+        curSecId = c.id;
+        sectionQueries[c.id] = { name: c.name, queries: [] };
+      } else if (c.type === "job" && curSecId) {
+        sectionQueries[curSecId].queries.push(c.query);
       }
-      return `<div class="cat-item" data-id="${esc(c.id)}" data-query="${esc(c.query)}" onclick="selectCat(this)">
-        <span class="cat-icon">${c.icon || "📁"}</span>
-        <span class="cat-name">${esc(c.name)}</span>
-      </div>`;
-    }).join("");
+    });
+
+    // Build HTML with collapsible groups
+    let html = "";
+    let inGroupId = null;
+    cats.forEach(c => {
+      if (c.type === "section") {
+        if (inGroupId !== null) html += `</div>`;
+        inGroupId = c.id;
+        html += `<div class="cat-section" data-section-id="${esc(c.id)}" onclick="selectSection(this)">
+          <span>${c.icon}</span>
+          <span style="flex:1">${esc(c.name)}</span>
+          <button class="cat-section-arrow" onclick="event.stopPropagation(); toggleCollapse('${esc(c.id)}', this)" title="Свернуть/развернуть">▼</button>
+        </div>
+        <div class="cat-group" data-group-id="${esc(c.id)}" style="max-height:2000px">`;
+      } else {
+        html += `<div class="cat-item" data-id="${esc(c.id)}" data-query="${esc(c.query)}" onclick="selectCat(this)">
+          <span class="cat-icon">${c.icon || "📁"}</span>
+          <span class="cat-name">${esc(c.name)}</span>
+        </div>`;
+      }
+    });
+    if (inGroupId !== null) html += `</div>`;
+
+    document.getElementById("catList").innerHTML = html;
   } catch {
     document.getElementById("catList").innerHTML =
       `<div style="padding:8px 12px;color:var(--red);font-size:11px;">Ошибка загрузки категорий</div>`;
   }
 }
 
+function toggleCollapse(secId, btn) {
+  const group = document.querySelector(`.cat-group[data-group-id="${secId}"]`);
+  if (!group) return;
+  const isCollapsed = group.classList.contains("collapsed");
+  if (isCollapsed) {
+    group.style.maxHeight = "2000px";
+    group.classList.remove("collapsed");
+    btn.style.transform = "rotate(0deg)";
+  } else {
+    group.style.maxHeight = "0px";
+    group.classList.add("collapsed");
+    btn.style.transform = "rotate(-90deg)";
+  }
+}
+
+function selectSection(el) {
+  const secId = el.dataset.sectionId;
+  const sec = sectionQueries[secId];
+  if (!sec || sec.queries.length === 0) return;
+
+  document.querySelectorAll(".cat-item").forEach(i => i.classList.remove("active"));
+  document.querySelectorAll(".cat-section").forEach(i => i.classList.remove("active"));
+  document.getElementById("starredTab").classList.remove("active");
+  el.classList.add("active");
+  viewingStarred = false;
+
+  const combined = sec.queries.join(" OR ");
+  document.getElementById("searchInput").value = combined;
+  doSearch(0);
+}
+
 function selectCat(el) {
   document.querySelectorAll(".cat-item").forEach(i => i.classList.remove("active"));
+  document.querySelectorAll(".cat-section").forEach(i => i.classList.remove("active"));
   document.getElementById("starredTab").classList.remove("active");
   el.classList.add("active");
   viewingStarred = false;
@@ -435,14 +603,24 @@ async function doSearch(page) {
   currentPage    = page;
   viewingStarred = false;
 
-  const area = document.getElementById("areaSelect").value;
-  const exp  = document.getElementById("expSelect").value;
-  const sal  = document.getElementById("salaryInput").value;
+  const area       = document.getElementById("areaSelect").value;
+  const exp        = document.getElementById("expSelect").value;
+  const sal        = document.getElementById("salaryInput").value;
+  const period     = document.getElementById("periodSelect").value;
+  const education  = document.getElementById("educationSelect").value;
+  const schedule   = document.getElementById("scheduleSelect").value;
+  const employment = document.getElementById("employmentSelect").value;
+  const order      = document.getElementById("orderSelect").value;
 
   let url = `${API}/search?query=${encodeURIComponent(q)}&page=${page}&per_page=20`;
-  if (area) url += `&area=${area}`;
-  if (exp)  url += `&experience=${exp}`;
-  if (sal)  url += `&salary_from=${sal}`;
+  if (area)       url += `&area=${area}`;
+  if (exp)        url += `&experience=${exp}`;
+  if (sal)        url += `&salary_from=${sal}`;
+  if (period)     url += `&period=${period}`;
+  if (education)  url += `&education=${encodeURIComponent(education)}`;
+  if (schedule)   url += `&schedule=${schedule}`;
+  if (employment) url += `&employment=${employment}`;
+  if (order)      url += `&order_by=${order}`;
 
   setListLoading();
   document.getElementById("searchBtn").disabled = true;
@@ -589,19 +767,77 @@ function renderPagination() {
 }
 
 // ── Preview ──
-function openPreview(id) {
+async function openPreview(id) {
   const v = vacancyMap.get(id);
   if (!v) return;
-  const url = v.url || v.alternate_url || "";
-  if (!url) return;
 
-  activeVacancyUrl   = url;
+  activeVacancyUrl   = v.url || "";
   activeVacancyTitle = v.name || "";
 
   document.getElementById("previewHeader").style.display = "flex";
   document.getElementById("previewTitle").textContent = activeVacancyTitle;
   document.getElementById("previewBody").innerHTML =
-    `<webview src="${url}" allowpopups></webview>`;
+    `<div class="vd-loading"><div class="spinner"></div><span>Загрузка...</span></div>`;
+
+  try {
+    const r = await fetch(`${API}/vacancy/${encodeURIComponent(id)}`);
+    const data = await r.json();
+    if (data.error) {
+      document.getElementById("previewBody").innerHTML =
+        `<div style="padding:16px"><div class="err-box">❌ ${esc(data.error)}</div></div>`;
+      return;
+    }
+    renderVacancyDetail(data);
+  } catch {
+    document.getElementById("previewBody").innerHTML =
+      `<div style="padding:16px"><div class="err-box">❌ Не удалось загрузить вакансию</div></div>`;
+  }
+}
+
+function renderVacancyDetail(v) {
+  const logoHtml = v.employer_logo
+    ? `<img class="vd-logo" src="${esc(v.employer_logo)}" alt="" onerror="this.outerHTML='<div class=vd-logo-ph>🏢</div>'">`
+    : `<div class="vd-logo-ph">🏢</div>`;
+
+  const salCls = (v.salary_text === "Зарплата не указана") ? "none" : "";
+  const dateStr = v.published_at
+    ? new Date(v.published_at).toLocaleDateString("ru-RU", {day:"numeric", month:"long", year:"numeric"})
+    : "";
+
+  const tags = [
+    v.area       ? `<span class="tag area">📍 ${esc(v.area)}</span>` : "",
+    v.experience ? `<span class="tag exp">💼 ${esc(v.experience)}</span>` : "",
+    v.employment ? `<span class="tag">🕐 ${esc(v.employment)}</span>` : "",
+    v.schedule   ? `<span class="tag">📅 ${esc(v.schedule)}</span>` : "",
+    dateStr      ? `<span class="tag date">🗓 ${dateStr}</span>` : "",
+  ].filter(Boolean).join("");
+
+  const skillsHtml = v.key_skills && v.key_skills.length
+    ? `<div>
+        <div class="vd-section-title">Ключевые навыки</div>
+        <div class="vd-skills">${v.key_skills.map(s => `<span class="vd-skill">${esc(s)}</span>`).join("")}</div>
+       </div>`
+    : "";
+
+  const descHtml = v.description
+    ? `<div class="vd-description">${v.description}</div>`
+    : "";
+
+  document.getElementById("previewBody").innerHTML = `
+    <div class="vd-wrap">
+      <div class="vd-top">
+        ${logoHtml}
+        <div class="vd-meta">
+          <div class="vd-title">${esc(v.name)}</div>
+          <div class="vd-company">${esc(v.employer_name)}</div>
+        </div>
+      </div>
+      <div class="vd-salary ${salCls}">${esc(v.salary_text)}</div>
+      <div class="vd-tags">${tags}</div>
+      ${skillsHtml}
+      <a class="vd-open-btn" href="${esc(v.url)}" target="_blank">↗ Открыть на HH.ru</a>
+      ${descHtml}
+    </div>`;
 }
 
 function closePreview() {

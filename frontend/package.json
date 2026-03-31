@@ -1,0 +1,12 @@
+{
+  "name": "agent-hh",
+  "version": "1.0.0",
+  "description": "Агент поиска работы на HH.ru",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "electron": "^28.0.0"
+  }
+}

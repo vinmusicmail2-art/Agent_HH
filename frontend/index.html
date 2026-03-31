@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent HH</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #0f172a;
+    --sidebar: #1e293b;
+    --card: #1e293b;
+    --card-hover: #263348;
+    --card-active: #1d3a5f;
+    --border: #334155;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --green: #22c55e;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --tag-bg: #1e3a5f;
+    --tag-text: #93c5fd;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-size: 13px;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--sidebar);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .logo { font-size: 18px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+  .logo span { color: var(--text-muted); font-weight: 400; font-size: 12px; margin-left: 4px; }
+  .search-row { flex: 1; display: flex; gap: 8px; align-items: center; }
+  input[type="text"], input[type="number"], select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 7px;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: var(--accent); }
+  input[type="text"]::placeholder, input[type="number"]::placeholder { color: var(--text-muted); }
+  #searchInput { flex: 1; padding: 7px 12px; }
+  .btn {
+    background: var(--accent); color: white; border: none;
+    padding: 7px 18px; border-radius: 7px; font-size: 13px; font-weight: 600;
+    cursor: pointer; white-space: nowrap; transition: background 0.15s;
+  }
+  .btn:hover { background: var(--accent-hover); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .status-badge {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 11px; color: var(--text-muted); white-space: nowrap;
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted); }
+  .dot.ok { background: var(--green); }
+  .dot.err { background: var(--red); }
+
+  /* ── FILTERS ── */
+  .filters {
+    background: var(--sidebar); border-bottom: 1px solid var(--border);
+    padding: 6px 16px; display: flex; gap: 10px; align-items: center; flex-shrink: 0;
+  }
+  .flabel { font-size: 11px; color: var(--text-muted); }
+  select { padding: 4px 8px; }
+  #salaryInput { padding: 4px 8px; width: 120px; }
+
+  /* ── BODY: 3 columns ── */
+  .body { display: flex; flex: 1; overflow: hidden; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 230px; background: var(--sidebar); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden;
+  }
+  /* Scrollable category list — must have flex:1 + min-height:0 to scroll properly */
+  .sidebar-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-bottom: 4px;
+  }
+  /* Section header (e.g. "AI-СПЕЦИАЛИСТЫ ПО ВИДЕО") */
+  .cat-section {
+    display: flex; align-items: center; gap: 6px;
+    padding: 10px 10px 4px;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px;
+    color: #64748b; font-weight: 700;
+    margin-top: 4px;
+  }
+  .cat-section:first-child { margin-top: 0; }
+  /* Clickable job item */
+  .cat-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 10px 6px 20px;
+    border-radius: 7px; margin: 1px 4px;
+    cursor: pointer; color: var(--text-muted); font-size: 12px;
+    transition: all 0.12s;
+  }
+  .cat-item:hover { background: var(--card-hover); color: var(--text); }
+  .cat-item.active { background: rgba(59,130,246,0.15); color: var(--accent); }
+  .cat-icon { font-size: 13px; flex-shrink: 0; }
+  .cat-name { flex: 1; line-height: 1.3; }
+  .cat-count {
+    background: var(--tag-bg); color: var(--tag-text); font-size: 10px;
+    padding: 1px 6px; border-radius: 10px; flex-shrink: 0;
+  }
+  /* "Отобранные" at the bottom — always visible */
+  .sidebar-bottom {
+    flex-shrink: 0;
+    border-top: 1px solid var(--border);
+    padding: 4px;
+  }
+  .starred-tab {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px 8px 12px;
+    border-radius: 7px; cursor: pointer; color: var(--text-muted); font-size: 13px;
+    font-weight: 600; transition: all 0.12s;
+  }
+  .starred-tab:hover { background: var(--card-hover); color: var(--yellow); }
+  .starred-tab.active { background: rgba(245,158,11,0.1); color: var(--yellow); }
+
+  /* ── JOB LIST ── */
+  .job-list-wrap {
+    width: 420px; display: flex; flex-direction: column; border-right: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .list-header {
+    padding: 8px 12px; background: var(--sidebar); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+  }
+  .found-label { font-size: 12px; color: var(--text-muted); }
+  .found-label b { color: var(--green); }
+  .pagination { display: flex; gap: 6px; align-items: center; }
+  .pg-btn {
+    background: var(--card); border: 1px solid var(--border); color: var(--text);
+    padding: 3px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;
+    transition: all 0.12s;
+  }
+  .pg-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .pg-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .pg-info { font-size: 11px; color: var(--text-muted); }
+  .job-list { flex: 1; overflow-y: auto; padding: 8px; }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; margin-bottom: 7px;
+    cursor: pointer; transition: all 0.15s; position: relative;
+  }
+  .card:hover { border-color: #475569; background: var(--card-hover); }
+  .card.selected { border-color: var(--accent); background: var(--card-active); }
+  .card.starred { border-left: 3px solid var(--yellow); }
+
+  .card-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+  .clogo {
+    width: 36px; height: 36px; border-radius: 7px; object-fit: contain;
+    background: #0f172a; flex-shrink: 0; border: 1px solid var(--border);
+  }
+  .clogo-ph {
+    width: 36px; height: 36px; border-radius: 7px; background: var(--tag-bg);
+    display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0;
+  }
+  .card-info { flex: 1; min-width: 0; }
+  .card-title {
+    font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.3;
+    margin-bottom: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .card-company { font-size: 11px; color: var(--text-muted); }
+
+  .star-btn {
+    background: none; border: none; cursor: pointer; font-size: 20px;
+    line-height: 1; padding: 0 2px; color: var(--border); transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .star-btn:hover { color: var(--yellow); transform: scale(1.2); }
+  .star-btn.on { color: var(--yellow); }
+
+  .card-salary {
+    font-size: 14px; font-weight: 700; color: var(--green); margin-bottom: 6px;
+  }
+  .card-salary.none { color: var(--text-muted); font-size: 12px; font-weight: 400; }
+
+  .card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 7px; }
+  .tag {
+    font-size: 10px; padding: 2px 7px; border-radius: 20px;
+    background: var(--tag-bg); color: var(--tag-text);
+  }
+  .tag.area { background: #1a3a2a; color: #86efac; }
+  .tag.exp  { background: #3a1a2a; color: #f9a8d4; }
+  .tag.date { background: #2a2a1a; color: #fde68a; }
+
+  .card-snippet {
+    font-size: 11px; color: var(--text-muted); line-height: 1.5;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  .open-btn {
+    display: inline-block; font-size: 11px; color: var(--accent);
+    text-decoration: none; padding: 3px 8px; border-radius: 5px;
+    border: 1px solid rgba(59,130,246,0.3); transition: all 0.12s;
+  }
+  .open-btn:hover { background: rgba(59,130,246,0.1); }
+
+  /* ── PREVIEW ── */
+  .preview-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .preview-header {
+    padding: 8px 14px; background: var(--sidebar); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+  }
+  .preview-title {
+    flex: 1; font-size: 13px; font-weight: 600; color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .preview-ext-btn {
+    font-size: 11px; color: var(--accent); padding: 3px 8px;
+    border: 1px solid rgba(59,130,246,0.3); border-radius: 5px;
+    white-space: nowrap; cursor: pointer; background: none; transition: all 0.12s;
+  }
+  .preview-ext-btn:hover { background: rgba(59,130,246,0.1); }
+  .preview-close {
+    background: none; border: none; color: var(--text-muted); cursor: pointer;
+    font-size: 16px; padding: 2px 6px; border-radius: 4px; transition: color 0.12s;
+  }
+  .preview-close:hover { color: var(--text); }
+
+  .preview-body { flex: 1; overflow: hidden; }
+  webview { width: 100%; height: 100%; border: none; background: white; display: block; }
+
+  .preview-placeholder {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 100%; gap: 14px; color: var(--text-muted);
+  }
+  .ph-icon { font-size: 48px; }
+  .ph-title { font-size: 16px; font-weight: 600; color: var(--text); }
+  .ph-sub { font-size: 13px; text-align: center; max-width: 280px; line-height: 1.6; }
+
+  /* States */
+  .state-wrap {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 300px; gap: 12px; color: var(--text-muted);
+  }
+  .state-icon { font-size: 40px; }
+  .state-title { font-size: 15px; font-weight: 600; color: var(--text); }
+  .state-sub { font-size: 12px; text-align: center; max-width: 280px; line-height: 1.6; }
+  .spinner {
+    width: 32px; height: 32px; border: 3px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .err-box {
+    background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);
+    color: #fca5a5; padding: 10px 14px; border-radius: 8px; font-size: 12px;
+  }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: #475569; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">Agent HH <span>поиск работы</span></div>
+  <div class="search-row">
+    <input id="searchInput" type="text" placeholder="Должность или ключевые слова..." />
+    <button class="btn" id="searchBtn" onclick="doSearch(0)">🔍 Найти</button>
+  </div>
+  <div class="status-badge">
+    <div class="dot" id="dot"></div>
+    <span id="dotLabel">...</span>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filters">
+  <span class="flabel">Город:</span>
+  <select id="areaSelect">
+    <option value="">Все города</option>
+    <option value="1">Москва</option>
+    <option value="2">Санкт-Петербург</option>
+    <option value="3">Екатеринбург</option>
+    <option value="54">Новосибирск</option>
+    <option value="66">Казань</option>
+    <option value="76">Ростов-на-Дону</option>
+    <option value="1438">Краснодар</option>
+  </select>
+  <span class="flabel">Опыт:</span>
+  <select id="expSelect">
+    <option value="">Любой</option>
+    <option value="noExperience">Без опыта</option>
+    <option value="between1And3">1–3 года</option>
+    <option value="between3And6">3–6 лет</option>
+    <option value="moreThan6">Более 6 лет</option>
+  </select>
+  <span class="flabel">Зарплата от:</span>
+  <input id="salaryInput" type="number" placeholder="напр. 100000" step="10000" min="0" />
+</div>
+
+<!-- BODY -->
+<div class="body">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <!-- Scrollable list of sections + jobs -->
+    <div class="sidebar-list" id="catList">
+      <div style="padding:16px 12px;color:var(--text-muted);font-size:12px;">Загрузка...</div>
+    </div>
+    <!-- "Отобранные" pinned at bottom -->
+    <div class="sidebar-bottom">
+      <div class="starred-tab" id="starredTab" onclick="showStarred()">
+        <span>⭐</span>
+        <span style="flex:1;">Отобранные</span>
+        <span class="cat-count" id="starredCount">0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- JOB LIST -->
+  <div class="job-list-wrap">
+    <div class="list-header">
+      <div class="found-label" id="foundLabel">Выберите категорию</div>
+      <div class="pagination" id="pagination"></div>
+    </div>
+    <div class="job-list" id="jobList">
+      <div class="state-wrap">
+        <div class="state-icon">🤖</div>
+        <div class="state-title">Готов к поиску</div>
+        <div class="state-sub">Выберите категорию слева или введите запрос и нажмите «Найти»</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PREVIEW -->
+  <div class="preview-wrap">
+    <div class="preview-header" id="previewHeader" style="display:none;">
+      <div class="preview-title" id="previewTitle"></div>
+      <button class="preview-ext-btn" onclick="openExternal()">↗ В браузере</button>
+      <button class="preview-close" onclick="closePreview()">✕</button>
+    </div>
+    <div class="preview-body" id="previewBody">
+      <div class="preview-placeholder">
+        <div class="ph-icon">👆</div>
+        <div class="ph-title">Предпросмотр вакансии</div>
+        <div class="ph-sub">Нажмите на карточку слева — вакансия откроется прямо здесь</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API = "http://127.0.0.1:8000/api";
+
+// Store vacancy data by ID to avoid passing data through onclick attributes
+const vacancyMap = new Map();
+
+let currentPage = 0;
+let totalPages  = 0;
+let activeVacancyUrl   = "";
+let activeVacancyTitle = "";
+let starred     = JSON.parse(localStorage.getItem("starred") || "{}");
+let viewingStarred = false;
+
+// ── Backend status ──
+async function checkBackend() {
+  try {
+    const r = await fetch(`${API}/healthz`);
+    if (r.ok) {
+      document.getElementById("dot").className = "dot ok";
+      document.getElementById("dotLabel").textContent = "Сервер работает";
+    } else throw new Error();
+  } catch {
+    document.getElementById("dot").className = "dot err";
+    document.getElementById("dotLabel").textContent = "Сервер не запущен";
+  }
+}
+
+// ── Categories ──
+async function loadCategories() {
+  try {
+    const r = await fetch(`${API}/categories`);
+    const cats = await r.json();
+    document.getElementById("catList").innerHTML = cats.map(c => {
+      if (c.type === "section") {
+        return `<div class="cat-section">${c.icon} ${esc(c.name)}</div>`;
+      }
+      return `<div class="cat-item" data-id="${esc(c.id)}" data-query="${esc(c.query)}" onclick="selectCat(this)">
+        <span class="cat-icon">${c.icon || "📁"}</span>
+        <span class="cat-name">${esc(c.name)}</span>
+      </div>`;
+    }).join("");
+  } catch {
+    document.getElementById("catList").innerHTML =
+      `<div style="padding:8px 12px;color:var(--red);font-size:11px;">Ошибка загрузки категорий</div>`;
+  }
+}
+
+function selectCat(el) {
+  document.querySelectorAll(".cat-item").forEach(i => i.classList.remove("active"));
+  document.getElementById("starredTab").classList.remove("active");
+  el.classList.add("active");
+  viewingStarred = false;
+  document.getElementById("searchInput").value = el.dataset.query;
+  doSearch(0);
+}
+
+// ── Search ──
+async function doSearch(page) {
+  const q = document.getElementById("searchInput").value.trim();
+  if (!q) return;
+  currentPage    = page;
+  viewingStarred = false;
+
+  const area = document.getElementById("areaSelect").value;
+  const exp  = document.getElementById("expSelect").value;
+  const sal  = document.getElementById("salaryInput").value;
+
+  let url = `${API}/search?query=${encodeURIComponent(q)}&page=${page}&per_page=20`;
+  if (area) url += `&area=${area}`;
+  if (exp)  url += `&experience=${exp}`;
+  if (sal)  url += `&salary_from=${sal}`;
+
+  setListLoading();
+  document.getElementById("searchBtn").disabled = true;
+
+  try {
+    const r    = await fetch(url);
+    const data = await r.json();
+    document.getElementById("searchBtn").disabled = false;
+    if (data.error) { setListError(data.error); return; }
+    totalPages = data.pages || 0;
+    renderList(data.items || [], data.found || 0);
+  } catch {
+    document.getElementById("searchBtn").disabled = false;
+    setListError("Не удалось подключиться к серверу. Убедитесь что бэкенд запущен.");
+  }
+}
+
+// ── Starred ──
+function showStarred() {
+  document.querySelectorAll(".cat-item").forEach(i => i.classList.remove("active"));
+  document.getElementById("starredTab").classList.add("active");
+  viewingStarred = true;
+  document.getElementById("foundLabel").innerHTML =
+    `⭐ <b style="color:var(--yellow)">Отобранные</b>`;
+  document.getElementById("pagination").innerHTML = "";
+
+  const items = Object.values(starred);
+  if (items.length === 0) {
+    document.getElementById("jobList").innerHTML = `
+      <div class="state-wrap">
+        <div class="state-icon">⭐</div>
+        <div class="state-title">Список пуст</div>
+        <div class="state-sub">Нажимайте ★ на вакансиях, чтобы добавлять их сюда</div>
+      </div>`;
+    return;
+  }
+  renderCards(items);
+}
+
+function toggleStar(id) {
+  const v = vacancyMap.get(id);
+  if (!v) return;
+
+  if (starred[id]) {
+    delete starred[id];
+  } else {
+    starred[id] = { ...v };
+  }
+  localStorage.setItem("starred", JSON.stringify(starred));
+  updateStarredCount();
+
+  // Update the star button and card border without re-rendering everything
+  const btn  = document.querySelector(`.star-btn[data-id="${id}"]`);
+  const card = document.querySelector(`.card[data-id="${id}"]`);
+  if (btn)  { btn.textContent = starred[id] ? "★" : "☆"; btn.classList.toggle("on", !!starred[id]); }
+  if (card) { card.classList.toggle("starred", !!starred[id]); }
+
+  if (viewingStarred) showStarred();
+}
+
+function updateStarredCount() {
+  document.getElementById("starredCount").textContent = Object.keys(starred).length;
+}
+
+// ── Render ──
+function renderList(items, found) {
+  document.getElementById("foundLabel").innerHTML =
+    `Найдено: <b>${found.toLocaleString("ru-RU")}</b> вакансий`;
+  renderPagination();
+
+  if (items.length === 0) {
+    document.getElementById("jobList").innerHTML = `
+      <div class="state-wrap">
+        <div class="state-icon">🔍</div>
+        <div class="state-title">Ничего не найдено</div>
+        <div class="state-sub">Попробуйте изменить запрос или убрать фильтры</div>
+      </div>`;
+    return;
+  }
+  renderCards(items);
+}
+
+function renderCards(items) {
+  // Store all vacancy data in the map for safe retrieval
+  items.forEach(v => vacancyMap.set(v.id, v));
+  document.getElementById("jobList").innerHTML = items.map(v => cardHTML(v)).join("");
+}
+
+function cardHTML(v) {
+  const isStarred = !!starred[v.id];
+  const safeId    = esc(v.id);
+
+  const logoHtml = v.employer_logo
+    ? `<img class="clogo" src="${esc(v.employer_logo)}" alt=""
+         onerror="this.outerHTML='<div class=clogo-ph>🏢</div>'">`
+    : `<div class="clogo-ph">🏢</div>`;
+
+  const salCls    = (v.salary_text === "Зарплата не указана") ? "none" : "";
+  const dateStr   = v.published_at
+    ? new Date(v.published_at).toLocaleDateString("ru-RU", {day:"numeric", month:"short"})
+    : "";
+  const snippetRaw = [v.requirement, v.responsibility]
+    .filter(Boolean).join(" ").replace(/<[^>]+>/g, "");
+  const url = v.url || v.alternate_url || "";
+
+  return `
+<div class="card ${isStarred ? "starred" : ""}" data-id="${safeId}"
+     onclick="openPreview('${safeId}')">
+  <div class="card-top">
+    ${logoHtml}
+    <div class="card-info">
+      <div class="card-title" title="${esc(v.name)}">${esc(v.name)}</div>
+      <div class="card-company">${esc(v.employer_name)}</div>
+    </div>
+    <button class="star-btn ${isStarred ? "on" : ""}" data-id="${safeId}"
+      onclick="event.stopPropagation(); toggleStar('${safeId}')"
+      title="${isStarred ? "Убрать из Отобранных" : "Добавить в Отобранные"}"
+    >${isStarred ? "★" : "☆"}</button>
+  </div>
+
+  <div class="card-salary ${salCls}">${esc(v.salary_text)}</div>
+
+  <div class="card-tags">
+    ${v.area       ? `<span class="tag area">📍 ${esc(v.area)}</span>` : ""}
+    ${v.experience ? `<span class="tag exp">💼 ${esc(v.experience)}</span>` : ""}
+    ${dateStr      ? `<span class="tag date">🕐 ${dateStr}</span>` : ""}
+  </div>
+
+  ${snippetRaw ? `<div class="card-snippet">${esc(snippetRaw.slice(0, 320))}</div>` : ""}
+
+  <a class="open-btn" href="${esc(url)}" target="_blank"
+     onclick="event.stopPropagation()">↗ На HH.ru</a>
+</div>`;
+}
+
+function renderPagination() {
+  document.getElementById("pagination").innerHTML = totalPages > 1 ? `
+    <button class="pg-btn" ${currentPage <= 0 ? "disabled" : ""}
+      onclick="doSearch(${currentPage - 1})">← Назад</button>
+    <span class="pg-info">${currentPage + 1} / ${totalPages}</span>
+    <button class="pg-btn" ${currentPage >= totalPages - 1 ? "disabled" : ""}
+      onclick="doSearch(${currentPage + 1})">Вперёд →</button>
+  ` : "";
+}
+
+// ── Preview ──
+function openPreview(id) {
+  const v = vacancyMap.get(id);
+  if (!v) return;
+  const url = v.url || v.alternate_url || "";
+  if (!url) return;
+
+  activeVacancyUrl   = url;
+  activeVacancyTitle = v.name || "";
+
+  document.getElementById("previewHeader").style.display = "flex";
+  document.getElementById("previewTitle").textContent = activeVacancyTitle;
+  document.getElementById("previewBody").innerHTML =
+    `<webview src="${url}" allowpopups></webview>`;
+}
+
+function closePreview() {
+  activeVacancyUrl   = "";
+  activeVacancyTitle = "";
+  document.getElementById("previewHeader").style.display = "none";
+  document.getElementById("previewBody").innerHTML = `
+    <div class="preview-placeholder">
+      <div class="ph-icon">👆</div>
+      <div class="ph-title">Предпросмотр вакансии</div>
+      <div class="ph-sub">Нажмите на карточку слева — вакансия откроется прямо здесь</div>
+    </div>`;
+}
+
+function openExternal() {
+  if (activeVacancyUrl) window.open(activeVacancyUrl);
+}
+
+// ── State helpers ──
+function setListLoading() {
+  document.getElementById("foundLabel").textContent = "Поиск...";
+  document.getElementById("pagination").innerHTML = "";
+  document.getElementById("jobList").innerHTML =
+    `<div class="state-wrap"><div class="spinner"></div></div>`;
+}
+function setListError(msg) {
+  document.getElementById("foundLabel").textContent = "Ошибка";
+  document.getElementById("jobList").innerHTML =
+    `<div style="padding:12px;"><div class="err-box">❌ ${esc(msg)}</div></div>`;
+}
+
+function esc(s) {
+  if (s === null || s === undefined) return "";
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+// ── Init ──
+document.getElementById("searchInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") doSearch(0);
+});
+checkBackend();
+setInterval(checkBackend, 10000);
+loadCategories();
+updateStarredCount();
+</script>
+</body>
+</html>
